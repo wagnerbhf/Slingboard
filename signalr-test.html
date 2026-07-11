@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Slingboard - Teste SignalR</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 24px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #38bdf8;
+            font-size: 20px;
+        }
+
+        .row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        input, button {
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            background: #1e293b;
+            color: #e2e8f0;
+            font-size: 13px;
+        }
+
+        input {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        button {
+            background: #2563eb;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+            button:hover {
+                background: #1d4ed8;
+            }
+
+            button.secondary {
+                background: #334155;
+            }
+
+        #status {
+            font-weight: bold;
+            padding: 6px 10px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .connected {
+            background: #14532d;
+            color: #86efac;
+        }
+
+        .disconnected {
+            background: #7f1d1d;
+            color: #fca5a5;
+        }
+
+        #log {
+            background: #020617;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 12px;
+            height: 420px;
+            overflow-y: auto;
+            font-family: 'Consolas', monospace;
+            font-size: 12.5px;
+        }
+
+        .entry {
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .event-name {
+            color: #38bdf8;
+            font-weight: bold;
+        }
+
+        .timestamp {
+            color: #64748b;
+            font-size: 11px;
+        }
+
+        .payload {
+            color: #a3e635;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔌 Slingboard — Teste SignalR (KanbanHub)</h1>
+
+    <div class="row">
+        <input id="baseUrl" value="https://localhost:7060" placeholder="Base URL da API">
+    </div>
+    <div class="row">
+        <input id="token" placeholder="Cole aqui o accessToken (Bearer)">
+    </div>
+    <div class="row">
+        <input id="boardId" placeholder="Board ID para entrar (JoinBoard)">
+        <button id="connectBtn">Conectar</button>
+        <button id="joinBtn" class="secondary">Join Board</button>
+        <button id="leaveBtn" class="secondary">Leave Board</button>
+    </div>
+
+    <div id="status" class="disconnected">Desconectado</div>
+
+    <div id="log"></div>
+
+    <script>
+        let connection = null;
+        const log = document.getElementById('log');
+        const statusEl = document.getElementById('status');
+
+        function addLog(eventName, data) {
+            const entry = document.createElement('div');
+            entry.className = 'entry';
+            entry.innerHTML = `
+            <span class="event-name">${eventName}</span>
+            <span class="timestamp">${new Date().toLocaleTimeString()}</span>
+            <div class="payload">${JSON.stringify(data, null, 2)}</div>
+          `;
+            log.prepend(entry);
+        }
+
+        function setStatus(connected) {
+            statusEl.textContent = connected ? 'Conectado' : 'Desconectado';
+            statusEl.className = connected ? 'connected' : 'disconnected';
+        }
+
+        document.getElementById('connectBtn').addEventListener('click', async () => {
+            const baseUrl = document.getElementById('baseUrl').value.trim();
+            const token = document.getElementById('token').value.trim();
+
+            if (connection) {
+                await connection.stop();
+            }
+
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl(`${baseUrl}/hubs/kanban`, {
+                    accessTokenFactory: () => token
+                })
+                .withAutomaticReconnect()
+                .build();
+
+            const events = [
+                'TaskCreated', 'TaskUpdated', 'TaskMoved', 'TaskDeleted', 'TaskAssigned',
+                'BoardUpdated', 'MemberJoined', 'MemberLeft',
+                'LabelCreated', 'LabelUpdated', 'LabelDeleted'
+            ];
+
+            events.forEach(eventName => {
+                connection.on(eventName, (payload) => addLog(eventName, payload));
+            });
+
+            connection.onreconnecting(() => setStatus(false));
+            connection.onreconnected(() => setStatus(true));
+            connection.onclose(() => setStatus(false));
+
+            try {
+                await connection.start();
+                setStatus(true);
+                addLog('Connection', { message: 'Conectado com sucesso ao Hub!' });
+            } catch (err) {
+                addLog('Connection Error', { message: err.toString() });
+                setStatus(false);
+            }
+        });
+
+        document.getElementById('joinBtn').addEventListener('click', async () => {
+            const boardId = document.getElementById('boardId').value.trim();
+            if (!connection || connection.state !== signalR.HubConnectionState.Connected) {
+                addLog('Error', { message: 'Conecte-se primeiro.' });
+                return;
+            }
+            try {
+                await connection.invoke('JoinBoard', boardId);
+                addLog('JoinBoard', { boardId, message: 'Entrou no grupo do board.' });
+            } catch (err) {
+                addLog('JoinBoard Error', { message: err.toString() });
+            }
+        });
+
+        document.getElementById('leaveBtn').addEventListener('click', async () => {
+            const boardId = document.getElementById('boardId').value.trim();
+            if (!connection) return;
+            try {
+                await connection.invoke('LeaveBoard', boardId);
+                addLog('LeaveBoard', { boardId, message: 'Saiu do grupo do board.' });
+            } catch (err) {
+                addLog('LeaveBoard Error', { message: err.toString() });
+            }
+        });
+    </script>
+</body>
+</html>

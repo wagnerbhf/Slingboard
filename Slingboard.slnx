@@ -1,0 +1,20 @@
+<Solution>
+  <Folder Name="/.github/" />
+  <Folder Name="/.github/workflows/">
+    <File Path="backend-ci.yml" />
+  </Folder>
+  <Folder Name="/docs/">
+    <File Path="Slingboard.postman_collection" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="Slingboard.Api/Slingboard.Api.csproj" Id="74cbc40c-bf59-4300-a4dd-407faa042554" />
+    <Project Path="Slingboard.Application/Slingboard.Application.csproj" Id="a6543332-6644-4121-9568-83f98754fe60" />
+    <Project Path="Slingboard.Domain/Slingboard.Domain.csproj" Id="7317ccc4-d301-4af5-b06b-69430043466a" />
+    <Project Path="Slingboard.Infrastructure/Slingboard.Infrastructure.csproj" Id="17263614-3c86-46f3-9d5c-850aa7425dda" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="Slingboard.Application.Tests/Slingboard.Application.Tests.csproj" Id="be539a87-c8ee-4f95-b30c-d3c9b3f80072" />
+    <Project Path="Slingboard.Domain.Tests/Slingboard.Domain.Tests.csproj" Id="a1381ff7-7e90-465a-9b97-fe9b60599662" />
+    <Project Path="Slingboard.IntegrationTests/Slingboard.IntegrationTests.csproj" Id="6476be06-009a-467f-a203-350da0613e3d" />
+  </Folder>
+</Solution>

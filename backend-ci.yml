@@ -1,0 +1,51 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restaurar dependências
+        run: dotnet restore Slingboard.sln
+
+      - name: Build
+        run: dotnet build Slingboard.sln --configuration Release --no-restore
+
+      - name: Testes de Domain
+        run: dotnet test tests/Slingboard.Domain.Tests --configuration Release --no-build --logger "trx;LogFileName=domain-tests.trx"
+
+      - name: Testes de Application
+        run: dotnet test tests/Slingboard.Application.Tests --configuration Release --no-build --logger "trx;LogFileName=application-tests.trx"
+
+      - name: Testes de Integração
+        run: dotnet test tests/Slingboard.IntegrationTests --configuration Release --no-build --logger "trx;LogFileName=integration-tests.trx"
+
+      - name: Publicar resultados dos testes
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Resultados dos Testes
+          path: '**/*.trx'
+          reporter: dotnet-trx

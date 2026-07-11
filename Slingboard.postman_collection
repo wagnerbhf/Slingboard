@@ -1,0 +1,330 @@
+{
+  "info": {
+    "name": "Slingboard API",
+    "description": "Coleção completa da API do Slingboard: Auth, Boards, Columns e Tasks.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{accessToken}}", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://localhost:7060", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" },
+    { "key": "boardId", "value": "", "type": "string" },
+    { "key": "columnId", "value": "", "type": "string" },
+    { "key": "columnId2", "value": "", "type": "string" },
+    { "key": "taskId", "value": "", "type": "string" },
+    { "key": "userId", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"João Silva\",\n  \"email\": \"joao@teste.com\",\n  \"password\": \"SenhaForte123!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.accessToken) { pm.collectionVariables.set('accessToken', json.accessToken); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"joao@teste.com\",\n  \"password\": \"SenhaForte123!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.accessToken) { pm.collectionVariables.set('accessToken', json.accessToken); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/refresh", "host": ["{{baseUrl}}"], "path": ["api", "auth", "refresh"] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/logout", "host": ["{{baseUrl}}"], "path": ["api", "auth", "logout"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Boards",
+      "item": [
+        {
+          "name": "Create Board",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.id) { pm.collectionVariables.set('boardId', json.id); }",
+                  "if (json.columns && json.columns.length > 0) {",
+                  "  pm.collectionVariables.set('columnId', json.columns[0].id);",
+                  "  if (json.columns.length > 1) pm.collectionVariables.set('columnId2', json.columns[1].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Projeto Slingboard\",\n  \"description\": \"Board de testes do MVP\",\n  \"backgroundColor\": \"#1E3A8A\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/boards", "host": ["{{baseUrl}}"], "path": ["api", "boards"] }
+          }
+        },
+        {
+          "name": "List Boards",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/boards?search=",
+              "host": ["{{baseUrl}}"], "path": ["api", "boards"],
+              "query": [{ "key": "search", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Get Board By Id",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/v1/boards/{{boardId}}", "host": ["{{baseUrl}}"], "path": ["api", "boards", "{{boardId}}"] }
+          }
+        },
+        {
+          "name": "Update Board",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Projeto Slingboard Atualizado\",\n  \"description\": \"Descrição nova\",\n  \"backgroundColor\": \"#059669\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/boards/{{boardId}}", "host": ["{{baseUrl}}"], "path": ["api", "boards", "{{boardId}}"] }
+          }
+        },
+        {
+          "name": "Add Member",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"role\": \"Member\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/boards/{{boardId}}/members", "host": ["{{baseUrl}}"], "path": ["api", "boards", "{{boardId}}", "members"] }
+          }
+        },
+        {
+          "name": "Delete Board",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/v1/boards/{{boardId}}", "host": ["{{baseUrl}}"], "path": ["api", "boards", "{{boardId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Columns",
+      "item": [
+        {
+          "name": "Create Column",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.id) { pm.collectionVariables.set('columnId2', json.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Em Revisão\",\n  \"limit\": 5\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/boards/{{boardId}}/columns", "host": ["{{baseUrl}}"], "path": ["api", "boards", "{{boardId}}", "columns"] }
+          }
+        },
+        {
+          "name": "Update Column",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Em Revisão - QA\",\n  \"limit\": 3\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/columns/{{columnId2}}", "host": ["{{baseUrl}}"], "path": ["api", "columns", "{{columnId2}}"] }
+          }
+        },
+        {
+          "name": "Delete Column",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/columns/{{columnId2}}?moveTasksToColumnId={{columnId}}",
+              "host": ["{{baseUrl}}"], "path": ["api", "columns", "{{columnId2}}"],
+              "query": [{ "key": "moveTasksToColumnId", "value": "{{columnId}}" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tasks",
+      "item": [
+        {
+          "name": "Create Task",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.id) { pm.collectionVariables.set('taskId', json.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"columnId\": \"{{columnId}}\",\n  \"title\": \"Implementar login\",\n  \"description\": \"Criar tela de login com validação\",\n  \"priority\": \"High\",\n  \"dueDate\": \"2026-07-20T23:59:59Z\",\n  \"labelIds\": null,\n  \"assigneeId\": null\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/boards/{{boardId}}/tasks", "host": ["{{baseUrl}}"], "path": ["api", "boards", "{{boardId}}", "tasks"] }
+          }
+        },
+        {
+          "name": "List Tasks (sem filtro)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/v1/boards/{{boardId}}/tasks", "host": ["{{baseUrl}}"], "path": ["api", "boards", "{{boardId}}", "tasks"] }
+          }
+        },
+        {
+          "name": "List Tasks (com filtros)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/boards/{{boardId}}/tasks?columnId={{columnId}}&priority=High&search=login",
+              "host": ["{{baseUrl}}"], "path": ["api", "boards", "{{boardId}}", "tasks"],
+              "query": [
+                { "key": "columnId", "value": "{{columnId}}" },
+                { "key": "priority", "value": "High" },
+                { "key": "labelId", "value": "", "disabled": true },
+                { "key": "assigneeId", "value": "", "disabled": true },
+                { "key": "dueDateFrom", "value": "", "disabled": true },
+                { "key": "dueDateTo", "value": "", "disabled": true },
+                { "key": "search", "value": "login" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Task By Id",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/v1/tasks/{{taskId}}", "host": ["{{baseUrl}}"], "path": ["api", "tasks", "{{taskId}}"] }
+          }
+        },
+        {
+          "name": "Update Task",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Implementar login (JWT)\",\n  \"description\": \"Atualizado com detalhes de JWT\",\n  \"priority\": \"Urgent\",\n  \"dueDate\": \"2026-07-25T23:59:59Z\",\n  \"labelIds\": null\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/tasks/{{taskId}}", "host": ["{{baseUrl}}"], "path": ["api", "tasks", "{{taskId}}"] }
+          }
+        },
+        {
+          "name": "Assign Task",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assigneeId\": \"{{userId}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/tasks/{{taskId}}/assign", "host": ["{{baseUrl}}"], "path": ["api", "tasks", "{{taskId}}", "assign"] }
+          }
+        },
+        {
+          "name": "Unassign Task",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assigneeId\": null\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/tasks/{{taskId}}/assign", "host": ["{{baseUrl}}"], "path": ["api", "tasks", "{{taskId}}", "assign"] }
+          }
+        },
+        {
+          "name": "Delete Task",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/v1/tasks/{{taskId}}", "host": ["{{baseUrl}}"], "path": ["api", "tasks", "{{taskId}}"] }
+          }
+        }
+      ]
+    }
+  ]
+}

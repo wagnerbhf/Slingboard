@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: slingboard-db
+    environment:
+      POSTGRES_DB: slingboard
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: SUA_SENHA_AQUI
+    ports:
+      - "5432:5432"
+    volumes:
+      - slingboard-data:/var/lib/postgresql/data
+
+volumes:
+  slingboard-data:
