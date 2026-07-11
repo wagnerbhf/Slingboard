@@ -4,14 +4,14 @@ on:
   push:
     branches: [ master, develop ]
     paths:
-      - 'src/**'
-      - 'tests/**'
+      - '**.cs'
+      - '**.csproj'
       - '.github/workflows/backend-ci.yml'
   pull_request:
     branches: [ master, develop ]
     paths:
-      - 'src/**'
-      - 'tests/**'
+      - '**.cs'
+      - '**.csproj'
 
 jobs:
   build-and-test:
@@ -34,13 +34,13 @@ jobs:
         run: dotnet build Slingboard.slnx --configuration Release --no-restore
 
       - name: Testes de Domain
-        run: dotnet test tests/Slingboard.Domain.Tests --configuration Release --no-build --logger "trx;LogFileName=domain-tests.trx"
+        run: dotnet test Slingboard.Domain.Tests/Slingboard.Domain.Tests.csproj --configuration Release --no-build --logger "trx;LogFileName=domain-tests.trx"
 
       - name: Testes de Application
-        run: dotnet test tests/Slingboard.Application.Tests --configuration Release --no-build --logger "trx;LogFileName=application-tests.trx"
+        run: dotnet test Slingboard.Application.Tests/Slingboard.Application.Tests.csproj --configuration Release --no-build --logger "trx;LogFileName=application-tests.trx"
 
       - name: Testes de Integração
-        run: dotnet test tests/Slingboard.IntegrationTests --configuration Release --no-build --logger "trx;LogFileName=integration-tests.trx"
+        run: dotnet test Slingboard.IntegrationTests/Slingboard.IntegrationTests.csproj --configuration Release --no-build --logger "trx;LogFileName=integration-tests.trx"
 
       - name: Publicar resultados dos testes
         uses: dorny/test-reporter@v1
