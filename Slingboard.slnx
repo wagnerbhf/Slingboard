@@ -1,8 +1,4 @@
 <Solution>
-  <Folder Name="/.github/" />
-  <Folder Name="/.github/workflows/">
-    <File Path="backend-ci.yml" />
-  </Folder>
   <Folder Name="/docs/">
     <File Path="Slingboard.postman_collection" />
   </Folder>
