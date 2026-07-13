@@ -8,6 +8,7 @@ using Slingboard.Api.Endpoints.Columns;
 using Slingboard.Api.Endpoints.Exports;
 using Slingboard.Api.Endpoints.Labels;
 using Slingboard.Api.Endpoints.Tasks;
+using Slingboard.Api.Endpoints.Users;
 using Slingboard.Api.Hubs;
 using Slingboard.Api.Middleware;
 using Slingboard.Api.Realtime;
@@ -117,6 +118,7 @@ app.MapBoardEndpoints();
 app.MapColumnEndpoints();
 app.MapTaskEndpoints();
 app.MapLabelEndpoints();
+app.MapUserEndpoints();
 app.MapExportEndpoints();
 
 app.Run();
