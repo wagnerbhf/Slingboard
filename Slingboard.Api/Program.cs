@@ -21,6 +21,19 @@ using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
+const string CorsPolicyName = "SlingboardFrontend";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(CorsPolicyName, policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 builder.Services.AddOpenApi();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterCommandValidator>();
@@ -74,7 +87,6 @@ builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
-    // Política específica para Login: 5 tentativas a cada 15 minutos, por IP
     options.AddPolicy("login", context =>
         RateLimitPartition.GetFixedWindowLimiter(
             partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
@@ -85,7 +97,6 @@ builder.Services.AddRateLimiter(options =>
                 QueueLimit = 0
             }));
 
-    // Política geral para toda a API: 100 requisições por minuto, por IP
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
         RateLimitPartition.GetFixedWindowLimiter(
             partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
@@ -107,8 +118,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseStaticFiles();
-app.UseRateLimiter();
 app.UseHttpsRedirection();
+app.UseCors(CorsPolicyName);
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapHub<KanbanHub>("/hubs/kanban");
