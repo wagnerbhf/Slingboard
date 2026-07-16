@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using QuestPDF.Infrastructure;
 using Slingboard.Application.Common.Interfaces;
 using Slingboard.Infrastructure.Auth;
 using Slingboard.Infrastructure.Exports;
@@ -12,10 +14,12 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        QuestPDF.Settings.License = LicenseType.Community;
+
         services.AddDbContext<AppDbContext>(options => options
            .UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
            .EnableSensitiveDataLogging()
-           .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information));
+           .LogTo(Console.WriteLine, LogLevel.Information));
 
         services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
 

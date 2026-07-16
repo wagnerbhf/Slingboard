@@ -2,6 +2,9 @@
   <Folder Name="/docs/">
     <File Path="Slingboard.postman_collection" />
   </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="Slingboard.Api/Slingboard.Api.csproj" Id="74cbc40c-bf59-4300-a4dd-407faa042554" />
     <Project Path="Slingboard.Application/Slingboard.Application.csproj" Id="a6543332-6644-4121-9568-83f98754fe60" />
