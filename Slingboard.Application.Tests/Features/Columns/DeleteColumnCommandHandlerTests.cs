@@ -10,6 +10,7 @@ namespace Slingboard.Application.Tests.Features.Columns;
 public class DeleteColumnCommandHandlerTests
 {
     private readonly Mock<ICurrentUserService> _currentUserMock = new();
+    private readonly Mock<IRealtimeNotifier> _realtimeNotifierMock = new();
 
     [Fact]
     public async Task Handle_ComColunaVazia_DeveRemoverComSucesso()
@@ -23,7 +24,7 @@ public class DeleteColumnCommandHandlerTests
         await context.SaveChangesAsync();
 
         var colunaParaRemover = board.Columns.ElementAt(2); // "Done"
-        var handler = new DeleteColumnCommandHandler(context, _currentUserMock.Object);
+        var handler = new DeleteColumnCommandHandler(context, _currentUserMock.Object, _realtimeNotifierMock.Object);
         var command = new DeleteColumnCommand(colunaParaRemover.Id, null);
 
         await handler.Handle(command, CancellationToken.None);
@@ -47,7 +48,7 @@ public class DeleteColumnCommandHandlerTests
         context.Tasks.Add(task);
         await context.SaveChangesAsync();
 
-        var handler = new DeleteColumnCommandHandler(context, _currentUserMock.Object);
+        var handler = new DeleteColumnCommandHandler(context, _currentUserMock.Object, _realtimeNotifierMock.Object);
         var command = new DeleteColumnCommand(colunaOrigem.Id, colunaDestino.Id);
 
         await handler.Handle(command, CancellationToken.None);
@@ -72,7 +73,7 @@ public class DeleteColumnCommandHandlerTests
         await context.SaveChangesAsync();
 
         var ultimaColuna = board.Columns.Single();
-        var handler = new DeleteColumnCommandHandler(context, _currentUserMock.Object);
+        var handler = new DeleteColumnCommandHandler(context, _currentUserMock.Object, _realtimeNotifierMock.Object);
         var command = new DeleteColumnCommand(ultimaColuna.Id, null);
 
         var act = () => handler.Handle(command, CancellationToken.None).AsTask();

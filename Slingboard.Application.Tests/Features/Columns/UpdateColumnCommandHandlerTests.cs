@@ -11,6 +11,7 @@ namespace Slingboard.Application.Tests.Features.Columns;
 public class UpdateColumnCommandHandlerTests
 {
     private readonly Mock<ICurrentUserService> _currentUserMock = new();
+    private readonly Mock<IRealtimeNotifier> _realtimeNotifierMock = new();
 
     [Fact]
     public async Task Handle_ComDadosValidos_DeveAtualizarTituloELimite()
@@ -24,7 +25,7 @@ public class UpdateColumnCommandHandlerTests
         await context.SaveChangesAsync();
 
         var coluna = board.Columns.First();
-        var handler = new UpdateColumnCommandHandler(context, _currentUserMock.Object);
+        var handler = new UpdateColumnCommandHandler(context, _currentUserMock.Object, _realtimeNotifierMock.Object);
         var command = new UpdateColumnCommand(coluna.Id, "To Do - Backlog", 8);
 
         var result = await handler.Handle(command, CancellationToken.None);
@@ -39,7 +40,7 @@ public class UpdateColumnCommandHandlerTests
         await using var context = TestDbContextFactory.Create();
         _currentUserMock.Setup(c => c.UserId).Returns(Guid.NewGuid());
 
-        var handler = new UpdateColumnCommandHandler(context, _currentUserMock.Object);
+        var handler = new UpdateColumnCommandHandler(context, _currentUserMock.Object, _realtimeNotifierMock.Object);
         var command = new UpdateColumnCommand(Guid.NewGuid(), "Título", null);
 
         var act = () => handler.Handle(command, CancellationToken.None).AsTask();
@@ -60,7 +61,7 @@ public class UpdateColumnCommandHandlerTests
         var coluna = board.Columns.First();
 
         _currentUserMock.Setup(c => c.UserId).Returns(outsiderId);
-        var handler = new UpdateColumnCommandHandler(context, _currentUserMock.Object);
+        var handler = new UpdateColumnCommandHandler(context, _currentUserMock.Object, _realtimeNotifierMock.Object);
         var command = new UpdateColumnCommand(coluna.Id, "Novo Título", null);
 
         var act = () => handler.Handle(command, CancellationToken.None).AsTask();

@@ -1,6 +1,5 @@
 ﻿using QuestPDF.Fluent;
 using QuestPDF.Helpers;
-using QuestPDF.Infrastructure;
 using Slingboard.Application.Common.Interfaces;
 using Slingboard.Application.Features.Exports;
 
