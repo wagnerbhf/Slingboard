@@ -5,7 +5,10 @@ using Slingboard.Application.Common.Interfaces;
 
 namespace Slingboard.Application.Features.Columns.Commands.DeleteColumn;
 
-public class DeleteColumnCommandHandler(IAppDbContext context, ICurrentUserService currentUser) : IRequestHandler<DeleteColumnCommand, Unit>
+public class DeleteColumnCommandHandler(
+    IAppDbContext context,
+    ICurrentUserService currentUser,
+    IRealtimeNotifier realtimeNotifier) : IRequestHandler<DeleteColumnCommand, Unit>
 {
     public async ValueTask<Unit> Handle(DeleteColumnCommand request, CancellationToken cancellationToken)
     {
@@ -37,9 +40,17 @@ public class DeleteColumnCommandHandler(IAppDbContext context, ICurrentUserServi
             task.MoveTo(targetColumnId, maxOrder, currentUser.UserId);
         }
 
+        var deletedColumnId = column.Id;
         board.RemoveColumn(request.ColumnId);
 
         await context.SaveChangesAsync(cancellationToken);
+
+        await realtimeNotifier.NotifyColumnDeleted(board.Id, new
+        {
+            columnId = deletedColumnId,
+            tasksMovedToColumnId = targetColumnId,
+            deletedByUserId = currentUser.UserId
+        }, cancellationToken);
 
         return Unit.Value;
     }

@@ -12,4 +12,7 @@ public interface IRealtimeNotifier
     Task NotifyLabelCreated(Guid boardId, object payload, CancellationToken cancellationToken = default);
     Task NotifyLabelUpdated(Guid boardId, object payload, CancellationToken cancellationToken = default);
     Task NotifyLabelDeleted(Guid boardId, object payload, CancellationToken cancellationToken = default);
+    Task NotifyColumnCreated(Guid boardId, object payload, CancellationToken cancellationToken = default);
+    Task NotifyColumnUpdated(Guid boardId, object payload, CancellationToken cancellationToken = default);
+    Task NotifyColumnDeleted(Guid boardId, object payload, CancellationToken cancellationToken = default);
 }

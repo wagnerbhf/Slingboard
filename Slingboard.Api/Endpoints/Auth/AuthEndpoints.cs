@@ -28,8 +28,8 @@ public static class AuthEndpoints
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.UtcNow.AddDays(7)
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.Now.AddDays(7)
             });
 
             return Results.Ok(new { accessToken = result.AccessToken, expiresIn = result.ExpiresIn });
@@ -51,8 +51,8 @@ public static class AuthEndpoints
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.UtcNow.AddDays(7)
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.Now.AddDays(7)
             });
 
             return Results.Ok(new { accessToken = result.AccessToken, expiresIn = result.ExpiresIn });

@@ -6,7 +6,10 @@ using Slingboard.Application.Features.Boards;
 
 namespace Slingboard.Application.Features.Columns.Commands.UpdateColumn;
 
-public class UpdateColumnCommandHandler(IAppDbContext context, ICurrentUserService currentUser) : IRequestHandler<UpdateColumnCommand, ColumnDto>
+public class UpdateColumnCommandHandler(
+    IAppDbContext context,
+    ICurrentUserService currentUser,
+    IRealtimeNotifier realtimeNotifier) : IRequestHandler<UpdateColumnCommand, ColumnDto>
 {
     public async ValueTask<ColumnDto> Handle(UpdateColumnCommand request, CancellationToken cancellationToken)
     {
@@ -25,6 +28,16 @@ public class UpdateColumnCommandHandler(IAppDbContext context, ICurrentUserServi
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return new ColumnDto(column.Id, column.Title, column.Order, column.Limit);
+        var response = new ColumnDto(column.Id, column.Title, column.Order, column.Limit);
+
+        await realtimeNotifier.NotifyColumnUpdated(board.Id, new
+        {
+            columnId = column.Id,
+            title = column.Title,
+            limit = column.Limit,
+            updatedByUserId = currentUser.UserId
+        }, cancellationToken);
+
+        return response;
     }
 }

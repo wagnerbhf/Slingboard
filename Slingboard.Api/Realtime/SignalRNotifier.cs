@@ -35,4 +35,13 @@ public class SignalRNotifier(IHubContext<KanbanHub> hubContext) : IRealtimeNotif
 
     public Task NotifyLabelDeleted(Guid boardId, object payload, CancellationToken cancellationToken = default)
         => hubContext.Clients.Group(KanbanHub.GroupName(boardId)).SendAsync("LabelDeleted", payload, cancellationToken);
+
+    public Task NotifyColumnCreated(Guid boardId, object payload, CancellationToken cancellationToken = default)
+    => hubContext.Clients.Group(KanbanHub.GroupName(boardId)).SendAsync("ColumnCreated", payload, cancellationToken);
+
+    public Task NotifyColumnUpdated(Guid boardId, object payload, CancellationToken cancellationToken = default)
+        => hubContext.Clients.Group(KanbanHub.GroupName(boardId)).SendAsync("ColumnUpdated", payload, cancellationToken);
+
+    public Task NotifyColumnDeleted(Guid boardId, object payload, CancellationToken cancellationToken = default)
+        => hubContext.Clients.Group(KanbanHub.GroupName(boardId)).SendAsync("ColumnDeleted", payload, cancellationToken);
 }

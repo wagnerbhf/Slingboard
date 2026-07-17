@@ -6,7 +6,10 @@ using Slingboard.Application.Features.Boards;
 
 namespace Slingboard.Application.Features.Columns.Commands.CreateColumn;
 
-public class CreateColumnCommandHandler(IAppDbContext context, ICurrentUserService currentUser) : IRequestHandler<CreateColumnCommand, ColumnDto>
+public class CreateColumnCommandHandler(
+    IAppDbContext context,
+    ICurrentUserService currentUser,
+    IRealtimeNotifier realtimeNotifier) : IRequestHandler<CreateColumnCommand, ColumnDto>
 {
     public async ValueTask<ColumnDto> Handle(CreateColumnCommand request, CancellationToken cancellationToken)
     {
@@ -25,6 +28,17 @@ public class CreateColumnCommandHandler(IAppDbContext context, ICurrentUserServi
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return new ColumnDto(column.Id, column.Title, column.Order, column.Limit);
+        var response = new ColumnDto(column.Id, column.Title, column.Order, column.Limit);
+
+        await realtimeNotifier.NotifyColumnCreated(board.Id, new
+        {
+            columnId = column.Id,
+            title = column.Title,
+            order = column.Order,
+            limit = column.Limit,
+            createdByUserId = currentUser.UserId
+        }, cancellationToken);
+
+        return response;
     }
 }
